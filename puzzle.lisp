@@ -1,6 +1,6 @@
 #|
-#   Este ficheiro é designado para o desenvolvimento
-#   do projeto de IA.
+#   O ficheiro puzzle.lisp é designado para o desenvolvimento
+#   da resolução do problema, definição de operadores e heurísticas.
 #
 #   ===== PROGRAMADORES =====
 #   Lucas Alexandre S. F. de Almeida - 202100067

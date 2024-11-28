@@ -1,6 +1,6 @@
 #|
-#   O ficheiro developUserInterationScript.lisp é designado para o desenvolvimento
-#   da interação do utilizador.
+#   O ficheiro procura.lisp é designado para o desenvolvimento dos
+#   algorítmos de procura BFS, DFS, A*.
 #
 #   ===== PROGRAMADORES =====
 #   Lucas Alexandre S. F. de Almeida - 202100067
