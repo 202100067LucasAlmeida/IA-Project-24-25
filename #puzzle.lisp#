@@ -1,10 +1,10 @@
 #|
-#   O ficheiro puzzle.lisp È designado para o desenvolvimento
-#   da resoluÁ„o do problema, definiÁ„o de operadores e heurÌsticas.
+#   O ficheiro puzzle.lisp √© designado para o desenvolvimento
+#   da resolu√ß√£o do problema, defini√ß√£o de operadores e heur√≠sticas.
 #
 #   ===== PROGRAMADORES =====
 #   Lucas Alexandre S. F. de Almeida - 202100067
-#   Jo„o Pedro M. Morais - 202001541
+#   Jo√£o Pedro M. Morais - 202001541
 #
 #   ========= DOCENTE =========
 #   Prof. Joaquim Filipe
@@ -20,10 +20,10 @@
 (defun tabuleiro-vaziop (tabuleiro)
   (every #'(lambda (linha) (every #'(lambda (celula) (zerop celula)) linha)) tabuleiro))
 
-(defun substituir-posicao (indice lista valor)
+(defun substituir-posicao (indice lista &optional (valor 0))
   (append (subseq lista 0 indice) (list valor) (nthcdr (1+ indice) lista)))
 
-(defun substituir (linha-indice coluna-indice tabuleiro valor)
+(defun substituir (linha-indice coluna-indice tabuleiro &optional (valor 0))
   (substituir-posicao linha-indice tabuleiro
                       (substituir-posicao coluna-indice (linha linha-indice tabuleiro) valor)))
 
