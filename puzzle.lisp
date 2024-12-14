@@ -20,10 +20,10 @@
 (defun tabuleiro-vaziop (tabuleiro)
   (every #'(lambda (linha) (every #'(lambda (celula) (zerop celula)) linha)) tabuleiro))
 
-(defun substituir-posicao (indice lista valor)
+(defun substituir-posicao (indice lista &optional (valor 0))
   (append (subseq lista 0 indice) (list valor) (nthcdr (1+ indice) lista)))
 
-(defun substituir (linha-indice coluna-indice tabuleiro valor)
+(defun substituir (linha-indice coluna-indice tabuleiro &optional (valor 0))
   (substituir-posicao linha-indice tabuleiro
                       (substituir-posicao coluna-indice (linha linha-indice tabuleiro) valor)))
 
@@ -57,3 +57,4 @@
              ((and (= (length posicoes-a-incrementar) 1) (member pecas-na-posicao '(1 3 5)))
               (operador linha-indice coluna-indice (substituir nova-linha nova-coluna tabuleiro-incrementado 0)))
 (t (operador linha-indice coluna-indice (substituir nova-linha nova-coluna tabuleiro-incrementado)))))))))
+
