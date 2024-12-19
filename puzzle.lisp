@@ -11,6 +11,14 @@
 #
 |#
 
+(defun tabuleiro-vazio () 
+  (list '(0 0 0 0 0 0) '(0 0 0 0 0 0))
+)
+
+(defun tabuleiro-teste () 
+  (list '(1 2 3 4 5 6) '(6 5 4 3 2 1))
+)
+
 (defun linha (indice tabuleiro)
   (nth indice tabuleiro))
 
@@ -31,30 +39,46 @@
   (let ((valor (1+ (celula linha-indice coluna-indice tabuleiro))))
     (substituir linha-indice coluna-indice tabuleiro valor)))
 
-(defun distribuir-pecas (pecas linha-indice coluna-indice &optional (tabuleiro (tabuleiro-vazio)))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun distribuir-pecas (pecas linha coluna &optional (tabuleiro (tabuleiro-vazio)))
+  "Distribui o numero de pecas pelo tabuleiro em sentido anti-horário."
   (cond
-    ((zerop pecas) '())
-    (t (let* ((dimensoes (list 2 6))
-              (proxima-coluna (mod (1+ coluna-indice) (second dimensoes)))
-              (proxima-linha (cond
-                               ((zerop proxima-coluna) (mod (1+ linha-indice) (first dimensoes)))
-                               (t linha-indice))))
-         (cons (list linha-indice coluna-indice)
-               (distribuir-pecas (1- pecas) proxima-linha proxima-coluna tabuleiro))))))
+    ;; Caso base: Se o número de peças é zero, verifica se a casa final precisa ser ajustada
+    ((zerop pecas)
+     (let* ((casa (nth coluna (nth linha tabuleiro)))
+            (novo-tabuleiro
+             (if (member casa '(1 3 5))
+                 (atualizar-tabuleiro linha coluna 0 tabuleiro)
+                 tabuleiro)))
+       novo-tabuleiro))
+
+    ;; Caso recursivo: distribui uma peça e chama recursivamente
+    (t (let* ((zerar-inicial (= pecas (reduce #'+ (mapcar #'length tabuleiro))))
+              (atualizado-tabuleiro (if zerar-inicial
+                                        (atualizar-tabuleiro linha coluna 0 tabuleiro)
+                                        (let* ((prox (proxima-posicao linha coluna tabuleiro))
+                                               (prox-linha (car prox))
+                                               (prox-coluna (cadr prox)))
+                                          (incrementar-posicao prox-linha prox-coluna tabuleiro)))))
+         (distribuir-pecas (1- pecas) (car (proxima-posicao linha coluna atualizado-tabuleiro)) (cadr (proxima-posicao linha coluna atualizado-tabuleiro)) atualizado-tabuleiro)))))
+
+(defun proxima-posicao (linha coluna tabuleiro)
+  "Calcula a próxima posição no sentido anti-horário, ignorando a casa inicial ao completar uma volta."
+  (cond
+    ((and (= linha 0) (> coluna 0)) (list linha (1- coluna)))
+    ((and (= linha 0) (= coluna 0)) (list 1 coluna))
+    ((and (= linha 1) (< coluna 5)) (list linha (1+ coluna)))
+    ((and (= linha 1) (= coluna 5)) (list 0 5))
+    ((and (= linha 0) (= coluna 5)) (list linha (1- coluna)))))
+
+(defun atualizar-tabuleiro (linha coluna valor tabuleiro)
+  "Atualiza o tabuleiro na posição especificada com o valor dado."
+  (let ((linha-atualizada
+         (replace (nth linha tabuleiro) (list valor) :start1 coluna :end1 (1+ coluna))))
+    (replace tabuleiro (list linha-atualizada) :start1 linha :end1 (1+ linha))))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defun operador (linha-indice coluna-indice tabuleiro)
-  (let* ((pecas (celula linha-indice coluna-indice tabuleiro))
-         (tabuleiro-atualizado (substituir linha-indice coluna-indice tabuleiro 0))
-         (posicoes-a-incrementar (distribuir-pecas pecas linha-indice coluna-indice)))
-    (cond
-      ((null posicoes-a-incrementar) tabuleiro-atualizado)
-      (t (let* ((posicao (car posicoes-a-incrementar))
-                (nova-linha (first posicao))
-                (nova-coluna (second posicao))
-                (tabuleiro-incrementado (incrementar-posicao nova-linha nova-coluna tabuleiro-atualizado))
-                (pecas-na-posicao (celula nova-linha nova-coluna tabuleiro-incrementado)))
-           (cond
-             ((and (= (length posicoes-a-incrementar) 1) (member pecas-na-posicao '(1 3 5)))
-              (operador linha-indice coluna-indice (substituir nova-linha nova-coluna tabuleiro-incrementado 0)))
-(t (operador linha-indice coluna-indice (substituir nova-linha nova-coluna tabuleiro-incrementado)))))))))
+  (distribuir-pecas (celula linha-indice coluna-indice tabuleiro) linha-indice coluna-indice tabuleiro)
+)
 
