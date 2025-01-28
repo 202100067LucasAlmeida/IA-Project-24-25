@@ -1,10 +1,10 @@
 #|
-#   O ficheiro puzzle.lisp é designado para o desenvolvimento
-#   da resolução do problema, definição de operadores e heurísticas.
+#   O ficheiro puzzle.lisp ï¿½ designado para o desenvolvimento
+#   da resoluï¿½ï¿½o do problema, definiï¿½ï¿½o de operadores e heurï¿½sticas.
 #
 #   ===== PROGRAMADORES =====
 #   Lucas Alexandre S. F. de Almeida - 202100067
-#   João Pedro M. Morais - 202001541
+#   Joï¿½o Pedro M. Morais - 202001541
 #
 #   ========= DOCENTE =========
 #   Prof. Joaquim Filipe
@@ -41,9 +41,8 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun distribuir-pecas (pecas linha coluna &optional (tabuleiro (tabuleiro-vazio)))
-  "Distribui o numero de pecas pelo tabuleiro em sentido anti-horário."
   (cond
-    ;; Caso base: Se o número de peças é zero, verifica se a casa final precisa ser ajustada
+    ;; Caso base: Se o nï¿½mero de peï¿½as ï¿½ zero, verifica se a casa final precisa ser ajustada
     ((zerop pecas)
      (let* ((casa (nth coluna (nth linha tabuleiro)))
             (novo-tabuleiro
@@ -52,7 +51,7 @@
                  tabuleiro)))
        novo-tabuleiro))
 
-    ;; Caso recursivo: distribui uma peça e chama recursivamente
+    ;; Caso recursivo: distribui uma peï¿½a e chama recursivamente
     (t (let* ((zerar-inicial (= pecas (reduce #'+ (mapcar #'length tabuleiro))))
               (atualizado-tabuleiro (if zerar-inicial
                                         (atualizar-tabuleiro linha coluna 0 tabuleiro)
@@ -63,22 +62,22 @@
          (distribuir-pecas (1- pecas) (car (proxima-posicao linha coluna atualizado-tabuleiro)) (cadr (proxima-posicao linha coluna atualizado-tabuleiro)) atualizado-tabuleiro)))))
 
 (defun proxima-posicao (linha coluna tabuleiro)
-  "Calcula a próxima posição no sentido anti-horário, ignorando a casa inicial ao completar uma volta."
+  "Calcula a prï¿½xima posiï¿½ï¿½o no sentido anti-horï¿½rio, ignorando a casa inicial ao completar uma volta."
   (cond
     ((and (= linha 0) (> coluna 0)) (list linha (1- coluna)))
     ((and (= linha 0) (= coluna 0)) (list 1 coluna))
     ((and (= linha 1) (< coluna 5)) (list linha (1+ coluna)))
-    ((and (= linha 1) (= coluna 5)) (list 0 5))
-    ((and (= linha 0) (= coluna 5)) (list linha (1- coluna)))))
+    ((and (= linha 1) (= coluna 5)) (list 0 5))))
 
 (defun atualizar-tabuleiro (linha coluna valor tabuleiro)
-  "Atualiza o tabuleiro na posição especificada com o valor dado."
+  "Atualiza o tabuleiro na posiï¿½ï¿½o especificada com o valor dado."
   (let ((linha-atualizada
          (replace (nth linha tabuleiro) (list valor) :start1 coluna :end1 (1+ coluna))))
     (replace tabuleiro (list linha-atualizada) :start1 linha :end1 (1+ linha))))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
 (defun operador (linha-indice coluna-indice tabuleiro)
-  (distribuir-pecas (celula linha-indice coluna-indice tabuleiro) linha-indice coluna-indice tabuleiro)
+  (let ((pecas (celula linha-indice coluna-indice tabuleiro)))
+    (atualizar-tabuleiro linha-indice coluna-indice 0 tabuleiro)
+    (distribuir-pecas pecas linha-indice coluna-indice tabuleiro))
 )
 
