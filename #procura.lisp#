@@ -33,8 +33,8 @@
     )))
 )
 
-(defun validate-childs (childs)
+(defun validar-nos (childs)
   "Validate if any child is the solution."
   (cond ((null childs) nil)
     ((tabuleiro-vaziop (first childs)) (first childs))
-    (t (validate-childs (rest childs))))) 
+    (t (validar-nos (rest childs))))) 
