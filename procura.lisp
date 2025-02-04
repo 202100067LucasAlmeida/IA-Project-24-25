@@ -30,6 +30,17 @@
 			  (operador (first coordenadas) (second coordenadas) (deep-copy tabuleiro)))
 		      '((0 0) (0 1) (0 2) (0 3) (0 4) (0 5) (1 0) (1 1) (1 2) (1 3) (1 4) (1 5)))))
 
+(defun validate-children(children)
+  "Validates if any of the children is the solution. Returns the child that is solution or nil"
+  (cond ((null children) nil)
+        ((tabuleiro-vaziop (first children)) (first children))
+        (t (validate-children (rest children)))))
+
+(defun check-element-in-list(board list)
+  "Checks if the element is already in list"
+  (some #'(lambda(b)
+            (equal board b))
+        list))
 
 (defun algorithm(tabuleiro fn-list-open)
   "Performs the algorithm for bfs and dfs"
@@ -40,9 +51,13 @@
 	((recursive(open closed)
 	   (if (null open) return-from recursive nil)
 	   (let* ((node (first open))
-		  (children (sexo node)))
-	     ;; Validate if any child is solution
-	     ;; if it is return it
+		      (children (sexo node))
+              (solution (validate-children children)))
+         (when (not (null solution)) (return-from recursive solution)) ;; Validate if any child is solution
+         (mapcar #'(lambda(c)
+                        (if (not (check-element-in-list c open)) (append c open))) ;; Append doesn't add to open (it creates a new list and returns it)
+                    children)
+         (if (not (check-element-in-list node closed)) (append closed node)) ;; Append doesn't add to open (it creates a new list and returns it)
 	     (recursive (fn-list-open (rest open) children) closed)))))
     (recursive list-open list-closed)))
     
