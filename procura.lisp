@@ -49,45 +49,21 @@
 	(list-closed '())) ;; Closed are not being used yet
     (labels
 	((recursive(open closed)
-	   (if (null open) return-from recursive nil)
+	   (if (null open) (return-from recursive nil))
 	   (let* ((node (first open))
 		      (children (sexo node))
               (solution (validate-children children)))
          (when (not (null solution)) (return-from recursive solution)) ;; Validate if any child is solution
+         ;; Use Memoization to check if any child is in list
          (mapcar #'(lambda(c)
                         (if (not (check-element-in-list c open)) (append c open))) ;; Append doesn't add to open (it creates a new list and returns it)
                     children)
          (if (not (check-element-in-list node closed)) (append closed node)) ;; Append doesn't add to open (it creates a new list and returns it)
-	     (recursive (fn-list-open (rest open) children) closed)))))
-    (recursive list-open list-closed)))
+	     (recursive open closed))))
+      (recursive list-open list-closed))))
     
 
 (defun bfs(tabuleiro)
   "Breath First Search Algorithm"
-  (algorithm tabuleiro #'(lambda(open chidlren)
+  (algorithm tabuleiro #'(lambda(open children)
 			   (append open children))))
-
-(defun nome_bacano (abertos)
-  (cond
-   ((= (length abertos) 0) NIL)
-   (t (let* ((no (first abertos))
-             (sucessores (mapcar #'(lambda (coordenadas) 
-(operador (first coordenadas) (second coordenadas) tabuleiro))
-'((0 0) (0 1) (0 2)(0 3) (0 4) (0 5)(1 0) (1 1) (1 2)(1 3) (1 4) (1 5))))
-             ; valida-se
-             (validar-nos sucessores)
-             ; recursivo
-             (nome_bacano (cdr abertos))
-             )
-    )))
-)
-
-(defun validar-nos (sucessores)
-  (cond ((null sucessores) nil)
-        (defun validate-childs (childs)
-  "Validate if any child is the solution."
-  (cond ((null childs) nil)
-    ((tabuleiro-vaziop (first childs)) (first childs))
-    (t (validate-childs (rest childs))))) 
-  )
-)
