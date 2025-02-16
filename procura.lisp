@@ -45,25 +45,26 @@
 (defun algorithm(tabuleiro fn-list-open)
   "Performs the algorithm for bfs and dfs"
   (if (tabuleiro-vaziop tabuleiro) (return-from algorithm tabuleiro))
-  (let ((list-open '(tabuleiro))
-	(list-closed '())) ;; Closed are not being used yet
+  (let ((open (cons tabuleiro nil))
+	(closed '()))
     (labels
-	((recursive(open closed)
+	((recursive()
 	   (if (null open) (return-from recursive nil))
+	   (format t "~a~%" open)
 	   (let* ((node (first open))
 		      (children (sexo node))
               (solution (validate-children children)))
-         (when (not (null solution)) (return-from recursive solution)) ;; Validate if any child is solution
+         (when (not (null solution)) (return-from recursive solution))
          ;; Use Memoization to check if any child is in list
          (mapcar #'(lambda(c)
-                        (if (not (check-element-in-list c open)) (append c open))) ;; Append doesn't add to open (it creates a new list and returns it)
+                        (if (not (check-element-in-list c open)) (funcall fn-list-open c open))) ;; Append doesn't add to open (it creates a new list and returns it)
                     children)
-         (if (not (check-element-in-list node closed)) (append closed node)) ;; Append doesn't add to open (it creates a new list and returns it)
-	     (recursive open closed))))
-      (recursive list-open list-closed))))
+         (if (not (check-element-in-list node closed)) (push node closed))
+	     (recursive))))
+      (recursive))))
     
 
 (defun bfs(tabuleiro)
   "Breath First Search Algorithm"
-  (algorithm tabuleiro #'(lambda(open children)
-			   (append open children))))
+  (algorithm tabuleiro #'(lambda(child open)
+			   (push child open))))
