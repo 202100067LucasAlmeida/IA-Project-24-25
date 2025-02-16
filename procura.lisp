@@ -50,16 +50,15 @@
     (labels
 	((recursive()
 	   (if (null open) (return-from recursive nil))
-	   (format t "~a~%" open)
-	   (let* ((node (first open))
+	   (let* ((node (pop open))
 		      (children (sexo node))
               (solution (validate-children children)))
          (when (not (null solution)) (return-from recursive solution))
          ;; Use Memoization to check if any child is in list
-         (mapcar #'(lambda(c)
-                        (if (not (check-element-in-list c open)) (funcall fn-list-open c open))) ;; Append doesn't add to open (it creates a new list and returns it)
+	     (mapcar #'(lambda(c)
+                        (when (not (check-element-in-list c open)) (setf open (funcall fn-list-open c open))))
                     children)
-         (if (not (check-element-in-list node closed)) (push node closed))
+	     (when (not (check-element-in-list node closed)) (setf closed (append node closed)))
 	     (recursive))))
       (recursive))))
     
@@ -67,4 +66,4 @@
 (defun bfs(tabuleiro)
   "Breath First Search Algorithm"
   (algorithm tabuleiro #'(lambda(child open)
-			   (push child open))))
+			   (append child open))))
