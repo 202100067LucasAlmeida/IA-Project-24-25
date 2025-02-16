@@ -45,12 +45,15 @@
 (defun algorithm(tabuleiro fn-list-open)
   "Performs the algorithm for bfs and dfs"
   (if (tabuleiro-vaziop tabuleiro) (return-from algorithm tabuleiro))
-  (let ((open (cons tabuleiro nil))
-	(closed '()))
+  (let ((list-open (list tabuleiro))
+	(closed '())
+	(counter 0))
     (labels
-	((recursive()
+	((recursive(open)
+	   (when (< counter 14) (format t "Open: ~a~%" open) (format t "Node: ~a~%" (first open)) (incf counter))
+;;	   (when (= counter 14) (return-from algorithm "1"))
 	   (if (null open) (return-from recursive nil))
-	   (let* ((node (pop open))
+	   (let* ((node (first open))
 		      (children (sexo node))
               (solution (validate-children children)))
          (when (not (null solution)) (return-from recursive solution))
@@ -58,10 +61,9 @@
 	     (mapcar #'(lambda(c)
                         (when (not (check-element-in-list c open)) (setf open (funcall fn-list-open c open))))
                     children)
-	     (when (not (check-element-in-list node closed)) (setf closed (append node closed)))
-	     (recursive))))
-      (recursive))))
-    
+	     (when (not (check-element-in-list node closed)) (push node closed))
+	     (recursive (rest open)))))
+      (recursive list-open))))
 
 (defun bfs(tabuleiro)
   "Breath First Search Algorithm"
