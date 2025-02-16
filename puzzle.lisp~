@@ -11,6 +11,12 @@
 #
 |#
 
+(defun print-tabuleiro (tabuleiro)
+  (
+   print (first tabuleiro) (second tabuleiro)
+   )
+)
+
 (defun tabuleiro-vazio () 
   (list '(0 0 0 0 0 0) '(0 0 0 0 0 0))
 )
@@ -40,28 +46,7 @@
     (substituir linha-indice coluna-indice tabuleiro valor)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defun distribuir-pecas (pecas linha coluna &optional (tabuleiro (tabuleiro-vazio)))
-  (cond
-    ;; Caso base: Se o n�mero de pe�as � zero, verifica se a casa final precisa ser ajustada
-    ((zerop pecas)
-     (let* ((casa (nth coluna (nth linha tabuleiro)))
-            (novo-tabuleiro
-             (if (member casa '(1 3 5))
-                 (atualizar-tabuleiro linha coluna 0 tabuleiro)
-                 tabuleiro)))
-       novo-tabuleiro))
-
-    ;; Caso recursivo: distribui uma pe�a e chama recursivamente
-    (t (let* ((zerar-inicial (= pecas (reduce #'+ (mapcar #'length tabuleiro))))
-              (atualizado-tabuleiro (if zerar-inicial
-                                        (atualizar-tabuleiro linha coluna 0 tabuleiro)
-                                        (let* ((prox (proxima-posicao linha coluna tabuleiro))
-                                               (prox-linha (car prox))
-                                               (prox-coluna (cadr prox)))
-                                          (incrementar-posicao prox-linha prox-coluna tabuleiro)))))
-         (distribuir-pecas (1- pecas) (car (proxima-posicao linha coluna atualizado-tabuleiro)) (cadr (proxima-posicao linha coluna atualizado-tabuleiro)) atualizado-tabuleiro)))))
-
-(defun proxima-posicao (linha coluna tabuleiro)
+(defun proxima-posicao (linha coluna)
   "Calcula a pr�xima posi��o no sentido anti-hor�rio, ignorando a casa inicial ao completar uma volta."
   (cond
     ((and (= linha 0) (> coluna 0)) (list linha (1- coluna)))
@@ -69,15 +54,30 @@
     ((and (= linha 1) (< coluna 5)) (list linha (1+ coluna)))
     ((and (= linha 1) (= coluna 5)) (list 0 5))))
 
+(defun distribuir-pecas(pecas linha coluna &optional (tabuleiro (tabuleiro-vazio)))
+  (cond ((= pecas 0) '())
+	(t (let ((pr (proxima-posicao linha coluna)))
+	     (cons pr (distribuir-pecas (1- pecas) (first pr) (second pr) tabuleiro))))))
+
 (defun atualizar-tabuleiro (linha coluna valor tabuleiro)
   "Atualiza o tabuleiro na posi��o especificada com o valor dado."
   (let ((linha-atualizada
          (replace (nth linha tabuleiro) (list valor) :start1 coluna :end1 (1+ coluna))))
     (replace tabuleiro (list linha-atualizada) :start1 linha :end1 (1+ linha))))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defun operador (linha-indice coluna-indice tabuleiro)
-  (let ((pecas ((celula linha-indice coluna-indice tabuleiro))))
-    (atualizar-tabuleiro linha-indice coluna-indice 0 tabuleiro)
-    (distribuir-pecas pecas linha-indice coluna-indice tabuleiro))
-)
+(defun operador(linha coluna tabuleiro)
+  (let* ((pecas (celula linha coluna tabuleiro))
+	 (coordenadas (distribuir-pecas pecas linha coluna tabuleiro)))
+    (when (null coordenadas) (return-from operador tabuleiro))
+    (atualizar-tabuleiro linha coluna 0 tabuleiro)
+    (mapcar #'(lambda(c)
+		(let ((x (first c))
+		      (y (second c)))
+		  (atualizar-tabuleiro x y (1+ (celula x y tabuleiro)) tabuleiro)))
+	    coordenadas)
+    (let* ((ultima (first (last coordenadas)))
+	   (n (celula (first ultima) (second ultima) tabuleiro)))
+      (when (or (= n 1) (= n 3) (= n 5))
+	(atualizar-tabuleiro (first ultima) (second ultima) 0 tabuleiro))))
+  tabuleiro)
 

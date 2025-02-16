@@ -11,6 +11,10 @@
 #
 |#
 
+(defun print-tabuleiro (tabuleiro)
+  (format t "First List: ~a~%Second List: ~a~%" (first tabuleiro) (second tabuleiro))
+)
+
 (defun tabuleiro-vazio () 
   (list '(0 0 0 0 0 0) '(0 0 0 0 0 0))
 )
