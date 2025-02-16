@@ -42,7 +42,7 @@
             (equal board b))
         list))
 
-(defun algorithm(tabuleiro)
+(defun algorithm(tabuleiro fn-open-list)
   "Performs the algorithm for bfs and dfs"
   (if (tabuleiro-vaziop tabuleiro) (return-from algorithm tabuleiro))
   (let ((list-open (list tabuleiro))
@@ -50,8 +50,9 @@
 	(counter 0))
     (labels
 	((recursive(open)
-	   (when (< counter 3) (format t "Open: ~a~%" open) (format t "Node: ~a~%" (first open)) (incf counter))
-	   (when (= counter 3) (return-from algorithm "1"))
+	   (print-tabuleiro (first open))
+;;	   (when (< counter 3) (format t "Open: ~a~%" open) (format t "Node: ~a~%" (first open)) (incf counter))
+;;	   (when (= counter 3) (return-from algorithm "1"))
 	   (if (null open) (return-from recursive nil))
 	   (let* ((node (first open))
 		  (children (sexo node))
@@ -59,7 +60,7 @@
 	     (when (not (null solution)) (return-from recursive solution))
 	     ;; Use Memoization to check if any child is in list
 	     (mapcar #'(lambda(c)
-			 (when (not (check-element-in-list c open)) (setf open (append open (list c)))))
+			 (when (not (check-element-in-list c open)) (setf open (funcall fn-open-list c open))))
 		     children)
 	     (when (not (check-element-in-list node closed)) (push node closed))
 	     (recursive (rest open)))))
@@ -67,5 +68,8 @@
 
 (defun bfs(tabuleiro)
   "Breath First Search Algorithm"
-  (algorithm tabuleiro #'(lambda(child open)
-			   (append child open))))
+  (algorithm tabuleiro #'(lambda(child open) (append open (list child)))))
+
+(defun dfs(tabuleiro)
+  "Depth First Search Algorithm"
+  (algorithm tabuleiro #'(lambda(child open) (append (list child) open))))
