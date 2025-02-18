@@ -48,7 +48,6 @@
 	   (print-tabuleiro (first open))
 	   (format t "--------------------------~%")
 	   (incf counter)
-	   (when (= counter 15) (return-from recursive '((0 0 0 0 0 0) (0 0 0 0 0 0))))
 	   (if (null open) (return-from recursive nil))
 	   (let* ((node (pop open))
 		  (children (sexo node))
@@ -69,3 +68,55 @@
 (defun dfs(tabuleiro)
   "Depth First Search Algorithm"
   (algorithm tabuleiro #'(lambda(child open) (append (list child) open))))
+
+;;;;;;;;;;;;;;;;;;;;;; A*
+;; Node: Board F G H Parent
+
+(defun get-board(node)
+  (first node))
+
+(defun get-cost(node)
+  (second node))
+
+(defun get-depth(node)
+  (third node))
+
+(defun create-node(board parent)
+  (let* ((f (heuristic board))
+	 (g (1+ (get-depth parent)))
+	 (h (- f g)))
+    (list board f g h parent)))
+
+(defun heuristic(board)
+  (reduce #'+ (mapcar #'(lambda(line) (reduce #'+ line)) board)))
+
+(defun sexo-com-protecao(node)
+  "Reproduz-se usando protecao para prevenir acidentes"
+  (let ((normal-children (sexo node)))
+    ))
+
+(defun a*(tabuleiro)
+  "Performs the a star algorithm"
+  (if (tabuleiro-vaziop tabuleiro) (return-from algorithm tabuleiro))
+  (let ((open (list tabuleiro))
+	(closed '())
+	(counter 0))
+    (labels
+	((recursive()
+	   (format t "Play: ~a~%" counter)
+	   (print-tabuleiro (first open))
+	   (format t "--------------------------~%")
+	   (incf counter)
+   (when (= counter 15) (return-from recursive '((0 0 0 0 0 0) (0 0 0 0 0 0))))
+	   (if (null open) (return-from recursive nil))
+	   (let* ((node (pop open))
+		  (children (sexo-com-protecao node))
+		  (solution (validate-children children)))
+	     (when (not (null solution)) (return-from recursive solution))
+	     ;; Use Memoization to check if any child is in list
+	     (when (not (check-element-in-list node closed)) (push node closed))
+	     (mapcar #'(lambda(c)
+			 (when (and (not (check-element-in-list c open)) (not (check-element-in-list c closed))) (setf open (funcall fn-open-list c open))))
+		     children)
+	     (recursive))))
+      (print-tabuleiro (recursive)))))
