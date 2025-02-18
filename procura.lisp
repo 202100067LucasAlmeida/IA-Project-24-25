@@ -18,12 +18,6 @@
 	    (if (listp x) (deep-copy x) x))
 	  lst))
 
-(defun remove-nils (lst)
-  "Returns a lista without any nil"
-  (cond ((null lst) '())
-        ((null (first lst)) (remove-nils (rest lst)))
-        (t (cons (first lst) (remove-nils (rest lst))))))
-
 (defun sexo(tabuleiro)
   "Reproduz-se como macho que este projeto deve ser"
   (remove nil (mapcar #'(lambda(coordenadas)
@@ -57,10 +51,14 @@
 	   (let* ((node (first open))
 		  (children (sexo node))
 		  (solution (validate-children children)))
+	     (format t "Children:~%")
+	     (mapcar #'(lambda(c) (print-tabuleiro c)) children)
+	     (format t "~a~%" open)
+	     (format t "---------------------------------------------------~%")
 	     (when (not (null solution)) (return-from recursive solution))
 	     ;; Use Memoization to check if any child is in list
 	     (mapcar #'(lambda(c)
-			 (when (not (check-element-in-list c open)) (setf open (funcall fn-open-list c open))))
+			 (when (and (not (check-element-in-list c open)) (not (check-element-in-list c closed))) (setf open (funcall fn-open-list c open))))
 		     children)
 	     (when (not (check-element-in-list node closed)) (push node closed))
 	     (recursive (rest open)))))
