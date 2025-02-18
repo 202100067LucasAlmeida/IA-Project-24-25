@@ -92,13 +92,25 @@
 
 (defun sexo-com-protecao(node)
   "Reproduz-se usando protecao para prevenir acidentes"
-  (let ((normal-children (sexo node)))
-    ))
+  (let ((normal-children (sexo (get-board node))))
+    (mapcar #'(lambda(c) (create-node c node)) normal-children)))
+
+(defun validate-children-astar(children)
+  "Validates if any of the children is the solution. Returns the child that is solution or nil"
+  (cond ((null children) nil)
+        ((tabuleiro-vaziop (get-board (first children))) (first children))
+        (t (validate-children (rest children)))))
+
+(defun check-node-in-list(node list)
+  "Checks if the mpde is already in list"
+  (some #'(lambda(b)
+            (equal board b))
+        list))
 
 (defun a*(tabuleiro)
   "Performs the a star algorithm"
   (if (tabuleiro-vaziop tabuleiro) (return-from algorithm tabuleiro))
-  (let ((open (list tabuleiro))
+  (let ((open (create-node tabuleiro '(nil 0 0 0 nil)))
 	(closed '())
 	(counter 0))
     (labels
@@ -111,7 +123,7 @@
 	   (if (null open) (return-from recursive nil))
 	   (let* ((node (pop open))
 		  (children (sexo-com-protecao node))
-		  (solution (validate-children children)))
+		  (solution (validate-children-astar children)))
 	     (when (not (null solution)) (return-from recursive solution))
 	     ;; Use Memoization to check if any child is in list
 	     (when (not (check-element-in-list node closed)) (push node closed))
