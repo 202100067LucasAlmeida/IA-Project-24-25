@@ -44,11 +44,11 @@
 	(counter 0))
     (labels
 	((recursive()
+	   (if (null open) (return-from recursive nil))
 	   (format t "Play: ~a~%" counter)
 	   (print-tabuleiro (first open))
 	   (format t "--------------------------~%")
 	   (incf counter)
-	   (if (null open) (return-from recursive nil))
 	   (let* ((node (pop open))
 		  (children (sexo node))
 		  (solution (validate-children children)))
@@ -99,36 +99,48 @@
   "Validates if any of the children is the solution. Returns the child that is solution or nil"
   (cond ((null children) nil)
         ((tabuleiro-vaziop (get-board (first children))) (first children))
-        (t (validate-children (rest children)))))
+        (t (validate-children-astar (rest children)))))
 
-(defun check-node-in-list(node list)
-  "Checks if the mpde is already in list"
-  (some #'(lambda(b)
-            (equal board b))
-        list))
+(defun find-node(node list)
+  "Finds the node in the list and returns it. If it doesn't exit returns nil"
+  (find (get-board node) list :test #'(lambda (b n) (equal b (get-board n)))))
+
+(defun update-node-in-list (node list)
+  "Updates the list by replacing the node if the new one has a lower cost (F value),
+   or adds the node if it is not found."
+  (let ((existing (find-node node list)))
+    (if existing
+        (if (< (get-cost node) (get-cost existing))
+            (progn
+              (setf list (remove existing list :test #'equal))
+              (push node list)))
+        (push node list)))
+  list)
 
 (defun a*(tabuleiro)
   "Performs the a star algorithm"
-  (if (tabuleiro-vaziop tabuleiro) (return-from algorithm tabuleiro))
-  (let ((open (create-node tabuleiro '(nil 0 0 0 nil)))
+  (if (tabuleiro-vaziop tabuleiro) (return-from a* tabuleiro))
+  (let ((open (list (create-node tabuleiro '(nil 0 0 0 nil))))
 	(closed '())
 	(counter 0))
     (labels
 	((recursive()
-	   (format t "Play: ~a~%" counter)
-	   (print-tabuleiro (first open))
-	   (format t "--------------------------~%")
-	   (incf counter)
-   (when (= counter 15) (return-from recursive '((0 0 0 0 0 0) (0 0 0 0 0 0))))
 	   (if (null open) (return-from recursive nil))
+	   (sort open #'< :key #'get-cost)
 	   (let* ((node (pop open))
 		  (children (sexo-com-protecao node))
 		  (solution (validate-children-astar children)))
+	     ;; Prints
+	     (format t "Play: ~a~%" counter)
+	     (print-tabuleiro (get-board node))
+	     (format t "--------------------------~%")
+	     (incf counter)
+	     ;;
 	     (when (not (null solution)) (return-from recursive solution))
 	     ;; Use Memoization to check if any child is in list
-	     (when (not (check-element-in-list node closed)) (push node closed))
+	     (push node closed)
 	     (mapcar #'(lambda(c)
-			 (when (and (not (check-element-in-list c open)) (not (check-element-in-list c closed))) (setf open (funcall fn-open-list c open))))
+			 (unless (find (get-board c) closed :test #'(lambda(b n) (equal b (get-board n)))) (setf open (update-node-in-list c open))))
 		     children)
 	     (recursive))))
-      (print-tabuleiro (recursive)))))
+      (print-tabuleiro (get-board (recursive))))))
