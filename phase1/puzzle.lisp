@@ -78,26 +78,3 @@
       (when (or (= n 1) (= n 3) (= n 5))
 	(atualizar-tabuleiro (first ultima) (second ultima) 0 tabuleiro))))
   tabuleiro)
-
-(defun get-number()
-  "Ask for input until get a number"
-  (format t "Enter a number > ")
-  (let ((value (read)))
-    (sleep 0.01)
-    (format t "~%")
-    (if (numberp value) (return-from get-number value)))
-  (format t "Invalid input! Please enter a number.")
-  (get-number))
-
-(defun get-valid-number (cap)
-  (let ((number (get-number)))
-    (if (or (<= number 0) (> number cap))
-	(get-valid-number cap)
-	(return-from get-valid-number number))))
-
-(defun main()
-  (format t "Choose the algorithm to run:~%1: BFS~%2: DFS~%3: A*~%")
-  (let ((choice (get-valid-number 3)))
-    (cond ((= choice 1) (bfs (tabuleiro-teste)))
-	  ((= choice 2) (dfs (tabuleiro-teste)))
-	  (t (a* (tabuleiro-teste))))))

@@ -52,7 +52,6 @@
 		  (children (expand node))
 		  (solution (validate-children children)))
 	     (when (not (null solution)) (return-from recursive solution))
-	     ;; Use Memoization to check if any child is in list
 	     (when (not (check-element-in-list node closed)) (push node closed))
 	     (mapcar #'(lambda(c)
 			 (when (and (not (check-element-in-list c open)) (not (check-element-in-list c closed))) (setf open (funcall fn-open-list c open))))
@@ -135,7 +134,6 @@
 	     (incf counter)
 	     ;;
 	     (when (not (null solution)) (return-from recursive solution))
-	     ;; Use Memoization to check if any child is in list
 	     (push node closed)
 	     (mapcar #'(lambda(c)
 			 (unless (find (get-board c) closed :test #'(lambda(b n) (equal b (get-board n)))) (setf open (update-node-in-list c open))))
