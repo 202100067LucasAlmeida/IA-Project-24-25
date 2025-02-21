@@ -18,8 +18,7 @@
 	    (if (listp x) (deep-copy x) x))
 	  lst))
 
-(defun sexo(tabuleiro player)
-  "Reproduz-se como macho que este projeto deve ser"
+(defun expand(tabuleiro player)
   (let ((list (if (= player 1) '((1 0) (1 1) (1 2) (1 3) (1 4) (1 5)) '((0 0) (0 1) (0 2) (0 3) (0 4) (0 5)))))
     (remove nil (mapcar #'(lambda(coordenadas)
 			    (operador (first coordenadas) (second coordenadas) (deep-copy tabuleiro)))
@@ -37,9 +36,8 @@
     (cond ((= player 1) (- line2 line1))
 	  (t (- line1 line2)))))
 
-(defun sexo-com-protecao(node player)
-  "Reproduz-se usando protecao para prevenir acidentes"
-  (let ((normal-children (sexo (get-board node) player)))
+(defun expand-node(node player)
+  (let ((normal-children (expand (get-board node) player)))
     (mapcar #'(lambda(c) (create-node c node)) normal-children)))
 
 (defun minimax (node depth alpha beta maximizing-player player)
@@ -48,7 +46,7 @@
       (values node (heuristic (get-board node) player))
     (let ((best-move nil)
           (best-score (if maximizing-player -1000000 1000000)))
-      (dolist (child (sexo-com-protecao node player))
+      (dolist (child (expand-node node player))
         (multiple-value-bind (move score)
             (minimax child (1- depth) alpha beta (not maximizing-player) (if (= player 1) 2 1))
           (if maximizing-player

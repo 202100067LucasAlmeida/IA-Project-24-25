@@ -18,8 +18,7 @@
 	    (if (listp x) (deep-copy x) x))
 	  lst))
 
-(defun sexo(tabuleiro)
-  "Reproduz-se como macho que este projeto deve ser"
+(defun expand(tabuleiro)
   (remove nil (mapcar #'(lambda(coordenadas)
 			  (operador (first coordenadas) (second coordenadas) (deep-copy tabuleiro)))
 		      '((0 0) (0 1) (0 2) (0 3) (0 4) (0 5) (1 0) (1 1) (1 2) (1 3) (1 4) (1 5)))))
@@ -50,7 +49,7 @@
 	   (format t "--------------------------~%")
 	   (incf counter)
 	   (let* ((node (pop open))
-		  (children (sexo node))
+		  (children (expand node))
 		  (solution (validate-children children)))
 	     (when (not (null solution)) (return-from recursive solution))
 	     ;; Use Memoization to check if any child is in list
@@ -90,9 +89,8 @@
 (defun heuristic(board)
   (reduce #'+ (mapcar #'(lambda(line) (reduce #'+ line)) board)))
 
-(defun sexo-com-protecao(node)
-  "Reproduz-se usando protecao para prevenir acidentes"
-  (let ((normal-children (sexo (get-board node))))
+(defun expand-node(node)
+  (let ((normal-children (expand (get-board node))))
     (mapcar #'(lambda(c) (create-node c node)) normal-children)))
 
 (defun validate-children-astar(children)
@@ -128,7 +126,7 @@
 	   (if (null open) (return-from recursive nil))
 	   (sort open #'< :key #'get-cost)
 	   (let* ((node (pop open))
-		  (children (sexo-com-protecao node))
+		  (children (expand-node node))
 		  (solution (validate-children-astar children)))
 	     ;; Prints
 	     (format t "Play: ~a~%" counter)
