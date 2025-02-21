@@ -44,10 +44,10 @@
 ; 	  (t (a* (tabuleiro-teste))))))
 
 (defun main()
-  (let ((boards (read-file-problems)))
+  (let ((boards (read-file-problem)))
     (print-boards boards)
     (format t "Choose the board:~%")
-    (let ((board (nth (1- (get-valid-number 7)) boards)))
+    (let ((board (1- (nth (get-valid-number 7)))))
       (format t "Choose the algorithm to run:~%1: BFS~%2: DFS~%3: A*~%")
         (let ((choice (get-valid-number 3)))
           (cond ((= choice 1) (bfs board))
